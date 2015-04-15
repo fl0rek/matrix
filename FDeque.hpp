@@ -34,15 +34,17 @@ public:
 		typedef std::bidirectional_iterator_tag iterator_category;
 
 		iterator();
-		iterator(const iterator&);
-		~iterator();
 
-		iterator& operator=(const iterator&);
-
-		iterator &operator++() {
-			this->n = n->n;
+		iterator &operator=(const iterator rhs) {
+			this->ptr = rhs.ptr;
 			return *this;
 		}
+
+		iterator &operator++() {
+			this->ptr++;
+			return *this;
+		}
+
 		iterator operator++(int) const {
 			iterator tmp(*this);
 			++(*this);
@@ -50,9 +52,10 @@ public:
 		}
 
 		iterator &operator--() {
-			this->n = n->p;
+			this->ptr--;
 			return *this;
 		}
+
 		iterator operator--(int) const {
 			iterator tmp(*this);
 			++(*this);
@@ -61,72 +64,122 @@ public:
 
 
 		reference operator*() const {
-			return (n->data).get();
-		}
-		pointer operator->() const {
-			return (n->data).get();
+			return *ptr;
 		}
 
-		bool operator==(iterator const& rhs) const {
-			return this->n == rhs.n;
+		pointer operator->() const {
+			return ptr;
 		}
-		bool operator!=(iterator const& rhs) const {
+
+		bool operator==(iterator const &rhs) const {
+			return this->ptr == rhs.ptr;
+		}
+
+		bool operator!=(iterator const &rhs) const {
 			return !(*this == rhs);
 		}
 
-		iterator(std::shared_ptr<Node<T>> rhs) : n(rhs) { }
-		iterator(iterator &rhs) {
-			n = std::make_shared(rhs.n);
+		iterator(T ptr) : ptr(ptr) { }
+
+		iterator(iterator &rhs) : ptr(rhs.ptr) {
 		}
 
+		~iterator() {
+
+		};
+
 	private:
-		std::shared_ptr<Node<T>> n;
+		T* ptr;
 	};
 
 
 	iterator begin() {
-		return iterator(this->p_start);
+		return iterator(this->iStart);
 	}
+
 	iterator end() {
-		return iterator(this->p_end);
+		return iterator(this->iEnd);
 	}
 
 
-	FDeque<T>& operator+=(const FDeque<T> &);
-	FDeque<T>& operator*=(const FDeque<T> &);
+	FDeque<T> &operator+=(const FDeque<T> &);
 
-	const FDeque<T> operator+(const FDeque<T> &) const;
-	const FDeque<T> operator*(const FDeque<T> &) const;
+	FDeque<T> &operator*=(const FDeque<T> &);
+
+	const FDeque<T> operator+(const FDeque<T> &rhs) const {
+		return FDeque<T>(*this) += rhs;
+	}
+
+	const FDeque<T> operator*(const FDeque<T> &rhs) const {
+		return FDeque<T>(*this) *= rhs;
+	}
 
 	bool operator==(const FDeque<T> &) const;
-	bool operator!=(const FDeque<T> &) const;
 
-	FDeque<T>(FDeque<T> &&);
-	FDeque<T>(const FDeque<T> &);
-	FDeque<T>() :
-			p_start(nullptr), p_end(nullptr) {
+	bool operator!=(const FDeque<T> &rhs) const {
+		return !(*this == rhs);
+	}
+
+	FDeque<T>(FDeque<T> &&o) : FDeque(o.currentCapacity) {
+		swap(*this, o);
+	}
+
+	FDeque<T>(const FDeque<T> &o) :
+			iStart(0), iEnd(o.length()), FDeque(o.currentCapacity) {
+		this->data = new T[this->currentCapacity];
+		if(o.iStart < o.iEnd) {
+			std::copy(o.data +o.iStart, o.data +o.iEnd, this->data);
+		} else {
+			auto end = std::copy(o.data +o.iEnd, o.data +o.currentCapacity-1, this->data);
+			std::copy(o.data, o.data +o.iStart, end);
+		}
+	};
+
+	FDeque<T>(int capacity = 64) :
+			iStart(0), iEnd(0), currentCapacity(capacity) {
+		data = new T[this->currentCapacity];
 		list_number++;
 	}
 
-	FDeque<T>& operator=(const FDeque<T>);
+	FDeque<T> &operator=(const FDeque<T> rhs) {
+		swap(*this, rhs);
+		return *this;
+	}
 
 	~FDeque<T>() {
+		delete [] data;
 		list_number--;
 	}
 
+	const int length() const {
+		int ret = this->iEnd - this->iStart;
+		return ret >= 0 ? ret : this->currentCapacity + ret;
+	}
+
 	template<class TT>
-	friend std::ostream& operator<<(std::ostream &os, FDeque<TT> &self) {
-		for(auto it : self) {
+	friend std::ostream &operator<<(std::ostream &os, FDeque<TT> &self) {
+		for (auto it : self) {
 			os << typeid(it).name();
 		}
 		return os;
 	}
+
 private:
 	static int list_number;
-	static void swap(FDeque<T> &, FDeque<T> &);
 
-	std::shared_ptr<Node<T>> p_start;
-	std::shared_ptr<Node<T>> p_end;
-	std::shared_ptr<Node<T>> current;
+	static void swap(FDeque<T> &lhs, FDeque<T> &rhs) {
+		using std::swap;
+		swap(lhs.data, rhs.data);
+		swap(lhs.currentCapacity, rhs.currentCapacity);
+		swap(lhs.iStart, rhs.iStart);
+		swap(lhs.iEnd, rhs.iEnd);
+
+	}
+
+	T *data;
+	int currentCapacity;
+
+	int iStart;
+	int iEnd;
 };
 
