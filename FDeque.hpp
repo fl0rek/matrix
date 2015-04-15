@@ -120,12 +120,11 @@ public:
 		return !(*this == rhs);
 	}
 
-	FDeque<T>(FDeque<T> &&o) : FDeque(o.currentCapacity) {
+	FDeque(FDeque<T> &&o) : FDeque(o.currentCapacity) {
 		swap(*this, o);
 	}
 
-	FDeque<T>(const FDeque<T> &o) :
-			iStart(0), iEnd(o.length()), FDeque(o.currentCapacity) {
+	FDeque(const FDeque<T> &o) : FDeque(o.currentCapacity, 0, o.length()) {
 		this->data = new T[this->currentCapacity];
 		if(o.iStart < o.iEnd) {
 			std::copy(o.data +o.iStart, o.data +o.iEnd, this->data);
@@ -135,8 +134,8 @@ public:
 		}
 	};
 
-	FDeque<T>(int capacity = 64) :
-			iStart(0), iEnd(0), currentCapacity(capacity) {
+	FDeque(int capacity = 64, int startingElement = 0, int endingElement = 0 ) :
+			iStart(startingElement), iEnd(endingElement), currentCapacity(capacity) {
 		data = new T[this->currentCapacity];
 		list_number++;
 	}
@@ -146,7 +145,7 @@ public:
 		return *this;
 	}
 
-	~FDeque<T>() {
+	~FDeque() {
 		delete [] data;
 		list_number--;
 	}
