@@ -102,7 +102,7 @@ public:
 	}
 
 	FDeque<T> &resize(int newSize) {
-		int offset = this->dataEnd - this->data;
+		unsigned long offset = this->dataEnd - this->data;
 		T* newdata = new T[newSize];
 		std::copy(this->data, this->dataEnd, newdata);
 		delete [] data;
@@ -123,16 +123,19 @@ public:
 		for(auto it : rhs) {
 			*this += it;
 		}
+		return *this;
 	}
 
 	FDeque<T> &operator*=(const FDeque<T> & rhs) {
 		for(auto it : rhs) {
 			*this -= it;
 		}
+		return *this;
 	}
 
 	FDeque<T> &operator-=(const T & rhs) {
 		this->data = std::remove(this->data, this->dataEnd, rhs);
+		return *this;
 	}
 
 	const FDeque<T> operator+(const FDeque<T> &rhs) const {
@@ -184,7 +187,7 @@ public:
 		list_number--;
 	}
 
-	const int length() const {
+	const unsigned long length() const {
 		return dataEnd - data -1; 
 	}
 
