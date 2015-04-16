@@ -1,3 +1,10 @@
+## Manual
+build/*
+
+# vim temp files
+*.swp
+
+## Genetared
 # Compiled Object files
 *.slo
 *.lo
