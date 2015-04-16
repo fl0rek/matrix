@@ -132,8 +132,7 @@ public:
 	}
 
 	FDeque<T> &operator-=(const T & rhs) {
-		auto removed = *el;
-		this->data = std::remove(this->data, this->dataEnd, removed);
+		this->data = std::remove(this->data, this->dataEnd, rhs);
 	}
 
 	const FDeque<T> operator+(const FDeque<T> &rhs) const {
@@ -151,7 +150,7 @@ public:
 	bool operator==(const FDeque<T> &rhs) const {
 		if(this->length() != rhs.length())
 			return false;
-		for(auto lh = this->begin(), auto rh = rhs.begin(); lh != this->end(); lh++, rh++) 
+		for(auto lh = this->begin(), rh = rhs.begin(); lh != this->end(); lh++, rh++) 
 			if(*lh != *rh)
 				return false;
 		return true;
@@ -203,10 +202,8 @@ private:
 	static void swap(FDeque<T> &lhs, FDeque<T> &rhs) {
 		using std::swap;
 		swap(lhs.data, rhs.data);
+		swap(lhs.dataEnd, rhs.dataEnd);
 		swap(lhs.currentCapacity, rhs.currentCapacity);
-		swap(lhs.iStart, rhs.iStart);
-		swap(lhs.iEnd, rhs.iEnd);
-
 	}
 
 	T *data;

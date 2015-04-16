@@ -1,5 +1,7 @@
 #pragma once 
 
+#include <memory>
+
 #ifndef D
 # ifdef _DEBUG
 #  define D(x) x

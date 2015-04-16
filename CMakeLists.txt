@@ -3,5 +3,5 @@ project(matrix)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++14")
 
-set(SOURCE_FILES main.cpp fdeque.cpp)
-add_executable(matrix ${SOURCE_FILES} FDequeIterator.cpp FDequeIterator.h Node.cpp Node.h)
+set(SOURCE_FILES main.cpp FDeque.cpp)
+add_executable(matrix ${SOURCE_FILES} FDeque.cpp)
