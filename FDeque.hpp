@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Node.h"
+#include "commons.h"
 
 #include <typeinfo>
 #include <cstdint>
@@ -9,12 +9,6 @@
 #include <memory>
 #include <algorithm>
 #include <limits>
-
-template<typename T, typename... Args>
-std::unique_ptr<T> make_unique(Args&&... args) {
-	return std::unique_ptr<T>(new T(std::forward<Args>(args)...));
-}
-
 
 template<typename T>
 class FDeque {
