@@ -1,6 +1,9 @@
 ## Manual
 build/*
 
+# CLion things
+.idea/*
+
 # vim temp files
 *.swp
 
