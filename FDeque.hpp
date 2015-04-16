@@ -27,8 +27,6 @@ public:
 		typedef typename T::pointer pointer;
 		typedef std::bidirectional_iterator_tag iterator_category;
 
-		iterator();
-
 		iterator &operator=(const iterator rhs) {
 			this->ptr = rhs.ptr;
 			return *this;
@@ -88,17 +86,55 @@ public:
 
 
 	iterator begin() {
-		return iterator(this->iStart);
+		return iterator(this->data);
 	}
 
 	iterator end() {
-		return iterator(this->iEnd);
+		return iterator(this->dataEnd);
 	}
 
+	bool contains(T & el) const {
+		for(auto it : this->data) {
+			if(*it == el)
+				return true;
+		}
+		return false;
+	}
 
-	FDeque<T> &operator+=(const FDeque<T> &);
+	FDeque<T> &resize(int newSize) {
+		int offset = this->dataEnd - this->data;
+		T* newdata = new T[newSize];
+		std::copy(this->data, this->dataEnd, newdata);
+		delete [] data;
+		this->data = newdata;
+		this->dataEnd = newdata + offset;
+		return this;
+	}
 
-	FDeque<T> &operator*=(const FDeque<T> &);
+	FDeque<T> &operator+=(const T & rhs) {
+		if(this.length()-1 >= this->currentCapacity) {
+			this->resize(this->currentCapacity *2);
+		}
+		this->dataEnd++ = rhs;
+		return this;
+	}
+
+	FDeque<T> &operator+=(const FDeque<T> & rhs) {
+		for(auto it : rhs) {
+			*this += it;
+		}
+	}
+
+	FDeque<T> &operator*=(const FDeque<T> & rhs) {
+		for(auto it : rhs) {
+			*this -= it;
+		}
+	}
+
+	FDeque<T> &operator-=(const T & rhs) {
+		auto removed = *el;
+		this->data = std::remove(this->data, this->dataEnd, removed);
+	}
 
 	const FDeque<T> operator+(const FDeque<T> &rhs) const {
 		return FDeque<T>(*this) += rhs;
@@ -108,7 +144,18 @@ public:
 		return FDeque<T>(*this) *= rhs;
 	}
 
-	bool operator==(const FDeque<T> &) const;
+	const FDeque<T> operator-(const T & rhs) const {
+		return FDeque<T>(*this) -= rhs;
+	}
+
+	bool operator==(const FDeque<T> &rhs) const {
+		if(this->length() != rhs.length())
+			return false;
+		for(auto lh = this->begin(), auto rh = rhs.begin(); lh != this->end(); lh++, rh++) 
+			if(*lh != *rh)
+				return false;
+		return true;
+	}
 
 	bool operator!=(const FDeque<T> &rhs) const {
 		return !(*this == rhs);
@@ -118,18 +165,12 @@ public:
 		swap(*this, o);
 	}
 
-	FDeque(const FDeque<T> &o) : FDeque(o.currentCapacity, 0, o.length()) {
-		this->data = new T[this->currentCapacity];
-		if(o.iStart < o.iEnd) {
-			std::copy(o.data +o.iStart, o.data +o.iEnd, this->data);
-		} else {
-			auto end = std::copy(o.data +o.iEnd, o.data +o.currentCapacity-1, this->data);
-			std::copy(o.data, o.data +o.iStart, end);
-		}
+	FDeque(const FDeque<T> &o) : FDeque(o.currentCapacity) {
+		std::copy(o.data, o.dataEnd, this->data);
 	};
 
-	FDeque(int capacity = 64, int startingElement = 0, int endingElement = 0 ) :
-			iStart(startingElement), iEnd(endingElement), currentCapacity(capacity) {
+	FDeque(int capacity = 64) :
+			currentCapacity(capacity) {
 		data = new T[this->currentCapacity];
 		list_number++;
 	}
@@ -145,14 +186,13 @@ public:
 	}
 
 	const int length() const {
-		int ret = this->iEnd - this->iStart;
-		return ret >= 0 ? ret : this->currentCapacity + ret;
+		return dataEnd - data -1; 
 	}
 
 	template<class TT>
-	friend std::ostream &operator<<(std::ostream &os, FDeque<TT> &self) {
+	friend std::ostream &operator<<(std::ostream &os, const FDeque<TT> &self) {
 		for (auto it : self) {
-			os << typeid(it).name();
+			os << it;
 		}
 		return os;
 	}
@@ -170,9 +210,7 @@ private:
 	}
 
 	T *data;
+	T *dataEnd;
 	int currentCapacity;
-
-	int iStart;
-	int iEnd;
 };
 
