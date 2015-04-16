@@ -19,37 +19,37 @@ public:
 	typedef typename T::difference_type difference_type;
 	typedef typename T::size_type size_type;
 
-	class iterator {
+	class const_iterator {
 	public:
 		typedef typename T::difference_type difference_type;
 		typedef typename T::value_type value_type;
-		typedef typename T::reference reference;
-		typedef typename T::pointer pointer;
+		typedef typename T::const_reference reference;
+		typedef typename T::const_pointer pointer;
 		typedef std::bidirectional_iterator_tag iterator_category;
 
-		iterator &operator=(const iterator rhs) {
+		const_iterator &operator=(const const_iterator rhs) {
 			this->ptr = rhs.ptr;
 			return *this;
 		}
 
-		iterator &operator++() {
+		const_iterator &operator++() {
 			this->ptr++;
 			return *this;
 		}
 
-		iterator operator++(int) const {
-			iterator tmp(*this);
+		const_iterator operator++(int) const {
+			const_iterator tmp(*this);
 			++(*this);
 			return tmp;
 		}
 
-		iterator &operator--() {
+		const_iterator &operator--() {
 			this->ptr--;
 			return *this;
 		}
 
-		iterator operator--(int) const {
-			iterator tmp(*this);
+		const_iterator operator--(int) const {
+			const_iterator tmp(*this);
 			++(*this);
 			return tmp;
 		}
@@ -63,20 +63,20 @@ public:
 			return ptr;
 		}
 
-		bool operator==(iterator const &rhs) const {
+		bool operator==(const_iterator const &rhs) const {
 			return this->ptr == rhs.ptr;
 		}
 
-		bool operator!=(iterator const &rhs) const {
+		bool operator!=(const_iterator const &rhs) const {
 			return !(*this == rhs);
 		}
 
-		iterator(T ptr) : ptr(ptr) { }
+		const_iterator(T ptr) : ptr(ptr) { }
 
-		iterator(iterator &rhs) : ptr(rhs.ptr) {
+		const_iterator(const_iterator &rhs) : ptr(rhs.ptr) {
 		}
 
-		~iterator() {
+		~const_iterator() {
 
 		};
 
@@ -85,16 +85,16 @@ public:
 	};
 
 
-	iterator begin() {
-		return iterator(this->data);
+	const_iterator begin() const {
+		return const_iterator(this->data);
 	}
 
-	iterator end() {
-		return iterator(this->dataEnd);
+	const_iterator end() const {
+		return const_iterator(this->dataEnd);
 	}
 
 	bool contains(T & el) const {
-		for(auto it : this->data) {
+		for(auto it = this->data; it != this->dataEnd; it++) {
 			if(*it == el)
 				return true;
 		}
@@ -108,15 +108,15 @@ public:
 		delete [] data;
 		this->data = newdata;
 		this->dataEnd = newdata + offset;
-		return this;
+		return *this;
 	}
 
 	FDeque<T> &operator+=(const T & rhs) {
-		if(this.length()-1 >= this->currentCapacity) {
+		if(this->length()-1 >= this->currentCapacity) {
 			this->resize(this->currentCapacity *2);
 		}
-		this->dataEnd++ = rhs;
-		return this;
+		*(this->dataEnd++) = rhs;
+		return *this;
 	}
 
 	FDeque<T> &operator+=(const FDeque<T> & rhs) {
