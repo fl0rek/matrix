@@ -211,3 +211,6 @@ private:
 	int currentCapacity;
 };
 
+template <typename T>
+int FDeque<T>::list_number = 0;
+
