@@ -163,7 +163,7 @@ bool Matrix::operator==(const Matrix &rhs) const {
  * defined in terms of == operator (follows law of excluded middle)
  */
 bool Matrix::operator!=(const Matrix &rhs) const {
-	return !(*this == rhs);
+	return !*this == rhs;
 }
 
 /**

@@ -9,15 +9,14 @@
 #include <memory>
 #include <algorithm>
 #include <limits>
+#include <iterator>
 
 template<typename T>
 class FDeque {
 public:
-	typedef typename T::value_type value_type;
-	typedef typename T::reference reference;
-	typedef typename T::const_reference const_reference;
-	typedef typename T::difference_type difference_type;
-	typedef typename T::size_type size_type;
+	typedef T value_type;
+	typedef T reference;
+	typedef T const_reference;
 
 	class const_iterator {
 	public:
@@ -71,31 +70,27 @@ public:
 			return !(*this == rhs);
 		}
 
-		const_iterator(T ptr) : ptr(ptr) { }
+		const_iterator(T const &ptr) : ptr(ptr) { }
 
-		const_iterator(const_iterator &rhs) : ptr(rhs.ptr) {
-		}
+		const_iterator(const_iterator &rhs) : ptr(rhs.ptr) {}
 
-		~const_iterator() {
-
-		};
+		~const_iterator() {};
 
 	private:
-		T* ptr;
+		T *ptr;
 	};
 
-
-	const_iterator begin() const {
-		return const_iterator(this->data);
+	const T* begin() const {
+		return this->data;
 	}
 
-	const_iterator end() const {
-		return const_iterator(this->dataEnd);
+	const T* end() const {
+		return this->dataEnd;
 	}
 
-	bool contains(T & el) const {
-		for(auto it = this->data; it != this->dataEnd; it++) {
-			if(*it == el)
+	bool contains(T &el) const {
+		for (auto it = this->data; it != this->dataEnd; it++) {
+			if (*it == el)
 				return true;
 		}
 		return false;
@@ -103,37 +98,46 @@ public:
 
 	FDeque<T> &resize(int newSize) {
 		unsigned long offset = this->dataEnd - this->data;
-		T* newdata = new T[newSize];
+		T *newdata = new T[newSize];
 		std::copy(this->data, this->dataEnd, newdata);
-		delete [] data;
+		delete[] data;
 		this->data = newdata;
 		this->dataEnd = newdata + offset;
 		return *this;
 	}
 
-	FDeque<T> &operator+=(const T & rhs) {
-		if(this->length()-1 >= this->currentCapacity) {
-			this->resize(this->currentCapacity *2);
+	FDeque<T> &push_back(const T &rhs) {
+		if (this->length() - 1 >= this->currentCapacity) {
+			this->resize(this->currentCapacity * 2);
 		}
 		*(this->dataEnd++) = rhs;
 		return *this;
 	}
 
-	FDeque<T> &operator+=(const FDeque<T> & rhs) {
-		for(auto it : rhs) {
+	FDeque<T> &push_front(const T &rhs) {
+		if (this->length() - 1 >= this->currentCapacity) {
+			this->resize(this->currentCapacity * 2);
+		}
+		std::rotate(std::reverse_iterator<T>(this->dataEnd), std::reverse_iterator<T>(this->dataEnd+1), std::reverse_iterator<T>(this->data));
+		this->data = rhs;
+		return *this;
+	}
+
+	FDeque<T> &operator+=(const FDeque<T> &rhs) {
+		for (auto it : rhs) {
 			*this += it;
 		}
 		return *this;
 	}
 
-	FDeque<T> &operator*=(const FDeque<T> & rhs) {
-		for(auto it : rhs) {
+	FDeque<T> &operator*=(const FDeque<T> &rhs) {
+		for (auto it : rhs) {
 			*this -= it;
 		}
 		return *this;
 	}
 
-	FDeque<T> &operator-=(const T & rhs) {
+	FDeque<T> &operator-=(const T &rhs) {
 		this->data = std::remove(this->data, this->dataEnd, rhs);
 		return *this;
 	}
@@ -146,15 +150,15 @@ public:
 		return FDeque<T>(*this) *= rhs;
 	}
 
-	const FDeque<T> operator-(const T & rhs) const {
+	const FDeque<T> operator-(const T &rhs) const {
 		return FDeque<T>(*this) -= rhs;
 	}
 
 	bool operator==(const FDeque<T> &rhs) const {
-		if(this->length() != rhs.length())
+		if (this->length() != rhs.length())
 			return false;
-		for(auto lh = this->begin(), rh = rhs.begin(); lh != this->end(); lh++, rh++) 
-			if(*lh != *rh)
+		for (auto lh = this->begin(), rh = rhs.begin(); lh != this->end(); lh++, rh++)
+			if (*lh != *rh)
 				return false;
 		return true;
 	}
@@ -183,16 +187,15 @@ public:
 	}
 
 	~FDeque() {
-		delete [] data;
+		delete[] data;
 		list_number--;
 	}
 
 	const unsigned long length() const {
-		return dataEnd - data -1; 
+		return dataEnd - data - 1;
 	}
 
-	template<class TT>
-	friend std::ostream &operator<<(std::ostream &os, const FDeque<TT> &self) {
+	friend std::ostream &operator<<(std::ostream &os, const FDeque<T> &self) {
 		for (auto it : self) {
 			os << it;
 		}
@@ -214,6 +217,6 @@ private:
 	int currentCapacity;
 };
 
-template <typename T>
+template<typename T>
 int FDeque<T>::list_number = 0;
 
