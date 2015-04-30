@@ -100,7 +100,7 @@ public:
 		unsigned long offset = this->dataEnd - this->data;
 		std::unique_ptr<T> newdata = std::make_unique<T>(newSize);
 		std::copy(this->data, this->dataEnd, newdata.get()); // can throw
-		delete[] data;
+		//delete[] this->data;
 		this->data = newdata.release(); // so we use unique_ptr to prevent leaking new array
 		this->dataEnd = this->data + offset;
 		return *this;
@@ -182,13 +182,16 @@ public:
 		return !(*this == rhs);
 	}
 
-	FDeque(FDeque<T> &&o) : FDeque(o.currentCapacity) {
+	FDeque(FDeque<T> &&o) noexcept : FDeque(o.currentCapacity) {
 		swap(*this, o);
 	}
 
 	FDeque(const FDeque<T> &o) : FDeque(o.currentCapacity) {
-		std::copy(o.data, o.dataEnd, this->data);
-		this->dataEnd = this->data + (o.dataEnd - o.data);
+		for(auto it = o.data; it != o.dataEnd; it++) {
+			*this->dataEnd++ = *it;
+		}
+		//std::copy(o.data, o.dataEnd, this->data);
+		//this->dataEnd = this->data + (o.dataEnd - o.data);
 	};
 
 	FDeque(int capacity = 64) :
@@ -202,8 +205,9 @@ public:
 		return *this;
 	}
 
-	~FDeque() {
-		delete[] data;
+	~FDeque() noexcept {
+		delete[] this->data;
+		this->data = nullptr;
 		list_number--;
 	}
 
