@@ -124,17 +124,31 @@ public:
 		return *this;
 	}
 
+	T &pop_back() {
+		return *(this->dataEnd--);
+	}
+
+	T &pop_front() {
+		std::rotate(this->data, this->data+1, this->dataEnd);
+		return this->pop_back();
+	}
+
 	FDeque<T> &operator+=(const FDeque<T> &rhs) {
 		for (auto it : rhs) {
-			*this += it;
+			if(!this->contains(it))
+				this->push_back(it);
 		}
 		return *this;
 	}
 
 	FDeque<T> &operator*=(const FDeque<T> &rhs) {
-		for (auto it : rhs) {
-			*this -= it;
+		auto dit = this->data;
+		for(auto sit = this->data; sit != this->dataEnd; sit++) {
+			std::cout << "foo" << std::endl;
+			if(rhs.contains(*sit))
+				*dit = *sit;
 		}
+		this->dataEnd = dit;
 		return *this;
 	}
 
@@ -174,6 +188,7 @@ public:
 
 	FDeque(const FDeque<T> &o) : FDeque(o.currentCapacity) {
 		std::copy(o.data, o.dataEnd, this->data);
+		this->dataEnd = this->data + (o.dataEnd - o.data);
 	};
 
 	FDeque(int capacity = 64) :
