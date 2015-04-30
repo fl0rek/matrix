@@ -145,14 +145,25 @@ void test_fdeque_sum() {
 
 void test_fdeque_resize() {
 	FDeque<Matrix<double>> a{};
-	for(uint32_t i = 0; i < 10000; i++) {
+	for(uint32_t i = 0; i < 100; i++) {
 		a.push_back(m0);
 	}
 	assert(a.contains(m0));
+	assert(a.length() == 100);
+}
+
+void test_fdeque_copy_construct() {
+	FDeque<Matrix<double>> a{};
+	a.push_back(m2);
+	FDeque<Matrix<double>> b{a};
+	FDeque<Matrix<double>> c = a;
+	assert(a == b);
+	assert(a == c);
 }
 
 void test_fdeque() {
 	test_fdeque_construction_and_comparator();
+	test_fdeque_copy_construct();
 	test_fdeque_contains();
 	test_fdeque_intersections();
 	test_fdeque_push_pop();

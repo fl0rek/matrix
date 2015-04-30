@@ -96,10 +96,12 @@ public:
 		return *this;
 	}
 
+	/*
 	FDeque<T> &operator-=(const T &rhs) {
 		this->data = std::remove(this->data, this->dataEnd, rhs);
 		return *this;
 	}
+	 */
 
 	const FDeque<T> operator+(const FDeque<T> &rhs) const {
 		return FDeque<T>(*this) += rhs;
@@ -109,9 +111,11 @@ public:
 		return FDeque<T>(*this) *= rhs;
 	}
 
+	/*
 	const FDeque<T> operator-(const T &rhs) const {
 		return FDeque<T>(*this) -= rhs;
 	}
+	 */
 
 	bool operator==(const FDeque<T> &rhs) const {
 		if (this->length() != rhs.length())
@@ -156,7 +160,7 @@ public:
 	}
 
 	const unsigned long length() const {
-		return dataEnd - data - 1;
+		return dataEnd - data;
 	}
 
 	friend std::ostream &operator<<(std::ostream &os, const FDeque<T> &self) {
