@@ -18,68 +18,6 @@ public:
 	typedef T reference;
 	typedef T const_reference;
 
-	class const_iterator {
-	public:
-		typedef typename T::difference_type difference_type;
-		typedef typename T::value_type value_type;
-		typedef typename T::const_reference reference;
-		typedef typename T::const_pointer pointer;
-		typedef std::bidirectional_iterator_tag iterator_category;
-
-		const_iterator &operator=(const const_iterator rhs) {
-			this->ptr = rhs.ptr;
-			return *this;
-		}
-
-		const_iterator &operator++() {
-			this->ptr++;
-			return *this;
-		}
-
-		const_iterator operator++(int) const {
-			const_iterator tmp(*this);
-			++(*this);
-			return tmp;
-		}
-
-		const_iterator &operator--() {
-			this->ptr--;
-			return *this;
-		}
-
-		const_iterator operator--(int) const {
-			const_iterator tmp(*this);
-			++(*this);
-			return tmp;
-		}
-
-
-		reference operator*() const {
-			return *ptr;
-		}
-
-		pointer operator->() const {
-			return ptr;
-		}
-
-		bool operator==(const_iterator const &rhs) const {
-			return this->ptr == rhs.ptr;
-		}
-
-		bool operator!=(const_iterator const &rhs) const {
-			return !(*this == rhs);
-		}
-
-		const_iterator(T const &ptr) : ptr(ptr) { }
-
-		const_iterator(const_iterator &rhs) : ptr(rhs.ptr) {}
-
-		~const_iterator() {};
-
-	private:
-		T *ptr;
-	};
-
 	const T* begin() const {
 		return this->data;
 	}
@@ -88,26 +26,31 @@ public:
 		return this->dataEnd;
 	}
 
-	bool contains(T &el) const {
+	bool contains(T const &el) const {
 		for (auto it = this->data; it != this->dataEnd; it++) {
-			if (*it == el)
+			if (*it == el) {
 				return true;
+			}
 		}
 		return false;
 	}
 
 	FDeque<T> &resize(int newSize) {
 		unsigned long offset = this->dataEnd - this->data;
-		std::unique_ptr<T> newdata = std::make_unique<T>(newSize);
-		std::copy(this->data, this->dataEnd, newdata.get()); // can throw
-		//delete[] this->data;
-		this->data = newdata.release(); // so we use unique_ptr to prevent leaking new array
+		T* newdata = new T[newSize];
+		uint32_t i = 0;
+		for(auto it = this->data; it != this->dataEnd; it++) {
+			newdata[i] = *it;
+		}
+		delete[] this->data;
+		this->data = newdata;
 		this->dataEnd = this->data + offset;
+		this->currentCapacity = newSize;
 		return *this;
 	}
 
 	FDeque<T> &push_back(const T rhs) {
-		if (this->length() - 1 <= this->currentCapacity) {
+		if (this->length() - 1 >= this->currentCapacity) {
 			this->resize(this->currentCapacity * 2);
 		}
 		*(this->dataEnd++) = rhs;
@@ -115,7 +58,7 @@ public:
 	}
 
 	FDeque<T> &push_front(const T &rhs) {
-		if (this->length() - 1 <= this->currentCapacity) {
+		if (this->length() - 1 >= this->currentCapacity) {
 			this->resize(this->currentCapacity * 2);
 		}
 		std::rotate(this->data, this->dataEnd, this->dataEnd+1);
@@ -144,9 +87,10 @@ public:
 	FDeque<T> &operator*=(const FDeque<T> &rhs) {
 		auto dit = this->data;
 		for(auto sit = this->data; sit != this->dataEnd; sit++) {
-			std::cout << "foo" << std::endl;
-			if(rhs.contains(*sit))
-				*dit = *sit;
+			if(rhs.contains(*sit)) {
+				*dit++ = *sit;
+			} else {
+			}
 		}
 		this->dataEnd = dit;
 		return *this;

@@ -105,20 +105,58 @@ void test_fdeque_intersections() {
 
 	FDeque<Matrix<double>> c{};
 	c.push_back(m3).push_back(m4);
-	std::cout << a << "\nb\n" << b << "\nc\n" << c << std::endl;
 	assert(a*b == c);
+
+	a *= b;
+	assert(a == c);
+}
+
+void test_fdeque_contains() {
+	FDeque<Matrix<double>> a{};
+	a.push_back(m0);
+	assert(a.contains(m0));
+	assert(!a.contains(m1));
 }
 
 void test_fdeque_push_pop() {
 	FDeque<Matrix<double>> a{};
 	a.push_front(m0).push_back(m1);
-	assert(a.pop_front() == m0);
 	assert(a.pop_front() == m1);
+	assert(a.pop_front() == m0);
+}
+
+void test_fdeque_sum() {
+	FDeque<Matrix<double>> a{};
+	a.push_back(m0).push_back(m3).push_back(m4);
+	FDeque<Matrix<double>> b{};
+	b.push_back(m1).push_back(m3).push_back(m4);
+
+	for(auto it : {m0, m1, m3, m4}) {
+		assert((a+b).contains(it));
+	}
+	assert(!(a+b).contains(m2));
+	a += b;
+
+	for(auto it : {m0, m1, m3, m4}) {
+		assert((a).contains(it));
+	}
+	assert(!(a).contains(m2));
+}
+
+void test_fdeque_resize() {
+	FDeque<Matrix<double>> a{};
+	for(uint32_t i = 0; i < 10000; i++) {
+		a.push_back(m0);
+	}
+	assert(a.contains(m0));
 }
 
 void test_fdeque() {
 	test_fdeque_construction_and_comparator();
+	test_fdeque_contains();
 	test_fdeque_intersections();
-	//test_fdeque_push_pop();
+	test_fdeque_push_pop();
+	test_fdeque_sum();
+	test_fdeque_resize();
 	std::cout << "test FDeque<T> passed!" << std::endl;
 }
