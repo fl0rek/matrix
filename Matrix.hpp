@@ -39,7 +39,7 @@ public:
 		Matrix(const Matrix &);
 		Matrix& operator=(const Matrix);
 */
-	~Matrix();
+	~Matrix() {};
 
 	Matrix<T> &operator+=(const Matrix<T> &rhs) {
 		for (uint32_t i = 0; i < this->matrix_size; ++i) {
@@ -63,7 +63,7 @@ public:
 		for (uint32_t row = 0; row < row_len; row++) {
 			for (uint32_t col = 0; col < row_len; col++) {
 				for (uint32_t k = 0; k < row_len; k++) {
-					tmp.vals[row * row_len + col] +=
+					tmp.vals[col * row_len + row] +=
 							this->vals[row * row_len + k] * rhs.vals[col * row_len + k];
 				}
 			}
@@ -73,26 +73,26 @@ public:
 	}
 
 	const Matrix<T> operator+(const Matrix<T> &rhs) const {
-		return Matrix<T>(this) += rhs;
+		return Matrix<T>(*this) += rhs;
 	}
 
 	const Matrix<T> operator-(const Matrix<T> &rhs) const {
-		return Matrix<T>(this) -= rhs;
+		return Matrix<T>(*this) -= rhs;
 	}
 
 	const Matrix<T> operator*(const Matrix<T> &rhs) const {
-		return Matrix<T>(this) *= rhs;
+		return Matrix<T>(*this) *= rhs;
 	}
 
 	bool operator==(const Matrix<T> &rhs) const {
 		for (uint32_t i = 0; i < this->matrix_size; i++)
-			if (this->vals[i] != rhs->vals[i])
+			if (this->vals[i] != rhs.vals[i])
 				return false;
 		return true;
 	}
 
 	bool operator!=(const Matrix<T> &rhs) const {
-		return !this == rhs;
+		return !(*this == rhs);
 	}
 
 	T denominator() const {
@@ -142,7 +142,7 @@ private:
 	T vals[matrix_size];
 
 
-	static constexpr T zero_value{0}; // zero initialization
+	static constexpr T zero_value{0};
 
 	static constexpr T one_value{1};
 };

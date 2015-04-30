@@ -98,16 +98,16 @@ public:
 
 	FDeque<T> &resize(int newSize) {
 		unsigned long offset = this->dataEnd - this->data;
-		T *newdata = new T[newSize];
-		std::copy(this->data, this->dataEnd, newdata);
+		std::unique_ptr<T> newdata = std::make_unique<T>(newSize);
+		std::copy(this->data, this->dataEnd, newdata.get()); // can throw
 		delete[] data;
-		this->data = newdata;
-		this->dataEnd = newdata + offset;
+		this->data = newdata.release(); // so we use unique_ptr to prevent leaking new array
+		this->dataEnd = this->data + offset;
 		return *this;
 	}
 
 	FDeque<T> &push_back(const T &rhs) {
-		if (this->length() - 1 >= this->currentCapacity) {
+		if (this->length() - 1 <= this->currentCapacity) {
 			this->resize(this->currentCapacity * 2);
 		}
 		*(this->dataEnd++) = rhs;
@@ -115,11 +115,12 @@ public:
 	}
 
 	FDeque<T> &push_front(const T &rhs) {
-		if (this->length() - 1 >= this->currentCapacity) {
+		if (this->length() - 1 <= this->currentCapacity) {
 			this->resize(this->currentCapacity * 2);
 		}
-		std::rotate(std::reverse_iterator<T>(this->dataEnd), std::reverse_iterator<T>(this->dataEnd+1), std::reverse_iterator<T>(this->data));
-		this->data = rhs;
+		std::rotate(this->data, this->dataEnd, this->dataEnd+1);
+		*(this->data) = rhs;
+		this->dataEnd++;
 		return *this;
 	}
 
@@ -177,7 +178,7 @@ public:
 
 	FDeque(int capacity = 64) :
 			currentCapacity(capacity) {
-		data = new T[this->currentCapacity];
+		dataEnd = data = new T[this->currentCapacity];
 		list_number++;
 	}
 
