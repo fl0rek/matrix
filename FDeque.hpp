@@ -106,7 +106,7 @@ public:
 		return *this;
 	}
 
-	FDeque<T> &push_back(const T &rhs) {
+	FDeque<T> &push_back(const T rhs) {
 		if (this->length() - 1 <= this->currentCapacity) {
 			this->resize(this->currentCapacity * 2);
 		}
