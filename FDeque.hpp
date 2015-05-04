@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <limits>
 #include <iterator>
+#include <utility>
 
 template<typename T>
 class FDeque {
@@ -35,12 +36,19 @@ public:
 		return false;
 	}
 
+	/**
+	 * Resizes deque to newSize or throws if unable
+	 * Used mostly internally, but there is no harm in exposing it outside
+	 * Provides basic exception guarantee
+	 */
 	FDeque<T> &resize(int newSize) {
 		unsigned long offset = this->dataEnd - this->data;
+		if (newSize <= offset || newSize < 1)
+			throw std::invalid_argument("new size too small");
 		T* newdata = new T[newSize];
 		uint32_t i = 0;
 		for(auto it = this->data; it != this->dataEnd; it++) {
-			newdata[i] = *it;
+			newdata[i++] = *it;
 		}
 		delete[] this->data;
 		this->data = newdata;
@@ -68,7 +76,10 @@ public:
 	}
 
 	T &pop_back() {
-		return *(this->dataEnd--);
+		if (2*this->length() + 10 < this->currentCapacity) {
+			this->resize(this->currentCapacity/2);
+		}
+		return *(--this->dataEnd);
 	}
 
 	T &pop_front() {
@@ -89,19 +100,11 @@ public:
 		for(auto sit = this->data; sit != this->dataEnd; sit++) {
 			if(rhs.contains(*sit)) {
 				*dit++ = *sit;
-			} else {
-			}
+			} 
 		}
 		this->dataEnd = dit;
 		return *this;
 	}
-
-	/*
-	FDeque<T> &operator-=(const T &rhs) {
-		this->data = std::remove(this->data, this->dataEnd, rhs);
-		return *this;
-	}
-	 */
 
 	const FDeque<T> operator+(const FDeque<T> &rhs) const {
 		return FDeque<T>(*this) += rhs;
@@ -110,12 +113,6 @@ public:
 	const FDeque<T> operator*(const FDeque<T> &rhs) const {
 		return FDeque<T>(*this) *= rhs;
 	}
-
-	/*
-	const FDeque<T> operator-(const T &rhs) const {
-		return FDeque<T>(*this) -= rhs;
-	}
-	 */
 
 	bool operator==(const FDeque<T> &rhs) const {
 		if (this->length() != rhs.length())
@@ -138,8 +135,6 @@ public:
 		for(auto it = o.data; it != o.dataEnd; it++) {
 			*this->dataEnd++ = *it;
 		}
-		//std::copy(o.data, o.dataEnd, this->data);
-		//this->dataEnd = this->data + (o.dataEnd - o.data);
 	};
 
 	FDeque(int capacity = 64) :
@@ -164,8 +159,9 @@ public:
 	}
 
 	friend std::ostream &operator<<(std::ostream &os, const FDeque<T> &self) {
+		os << "Matrix <" << typeid(T).name() << "> " << &self<< std::endl;
 		for (auto it : self) {
-			os << it;
+			os << "[" << &it << "] :\n"  << it ;
 		}
 		return os;
 	}

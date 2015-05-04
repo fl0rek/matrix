@@ -18,15 +18,16 @@ int main() {
 	test_fdeque();
 
 	std::cout << "Tests Passed!" <<std::endl;
-	std::getline(std::cin, foo);
 	return 0;
 }
 
 void test_matrix_construct_and_equality() {
 	Matrix<double> a{};
 	Matrix<double> b{1, 0, 0, 0, 1, 0, 0, 0, 1};
+	Matrix<double> c = b;
 	assert(a == a);
 	assert(a == b);
+	assert(b == c);
 }
 
 void test_matrix_inequality() {
@@ -120,9 +121,16 @@ void test_fdeque_contains() {
 
 void test_fdeque_push_pop() {
 	FDeque<Matrix<double>> a{};
+
+	a.push_front(m3);
+	assert(a.pop_front() == m3);
+	
+	a.push_back(m4);
+	assert(a.pop_front() == m4);
+
 	a.push_front(m0).push_back(m1);
-	assert(a.pop_front() == m1);
 	assert(a.pop_front() == m0);
+	assert(a.pop_front() == m1);
 }
 
 void test_fdeque_sum() {
