@@ -19,6 +19,9 @@ public:
 	typedef T reference;
 	typedef T const_reference;
 
+	/**
+	 * so we can use for( : ) syntax
+	 */
 	const T* begin() const {
 		return this->data;
 	}
@@ -39,7 +42,6 @@ public:
 	/**
 	 * Resizes deque to newSize or throws if unable
 	 * Used mostly internally, but there is no harm in exposing it outside
-	 * Provides basic exception guarantee
 	 */
 	FDeque<T> &resize(int newSize) {
 		unsigned long offset = this->dataEnd - this->data;
@@ -57,6 +59,9 @@ public:
 		return *this;
 	}
 
+	/**
+	 * resizes if nessesary
+	 */
 	FDeque<T> &push_back(const T rhs) {
 		if (this->length() - 1 >= this->currentCapacity) {
 			this->resize(this->currentCapacity * 2);
@@ -65,6 +70,9 @@ public:
 		return *this;
 	}
 
+	/**
+	 * rotates internal array and inserts at 1st position
+	 */
 	FDeque<T> &push_front(const T &rhs) {
 		if (this->length() - 1 >= this->currentCapacity) {
 			this->resize(this->currentCapacity * 2);
@@ -75,6 +83,9 @@ public:
 		return *this;
 	}
 
+	/**
+	 * frees memory if possible
+	 */
 	T &pop_back() {
 		if (2*this->length() + 10 < this->currentCapacity) {
 			this->resize(this->currentCapacity/2);
@@ -82,6 +93,9 @@ public:
 		return *(--this->dataEnd);
 	}
 
+	/**
+	 * rotates internal arrayy and pops back
+	 */
 	T &pop_front() {
 		std::rotate(this->data, this->data+1, this->dataEnd);
 		return this->pop_back();
@@ -114,6 +128,9 @@ public:
 		return FDeque<T>(*this) *= rhs;
 	}
 
+	/**
+	 * equal \iff both deques contain same elements in same order
+	 */
 	bool operator==(const FDeque<T> &rhs) const {
 		if (this->length() != rhs.length())
 			return false;
@@ -127,10 +144,16 @@ public:
 		return !(*this == rhs);
 	}
 
+	/**
+	 * move constructor
+	 */
 	FDeque(FDeque<T> &&o) noexcept : FDeque(o.currentCapacity) {
 		swap(*this, o);
 	}
 
+	/**
+	 * copy constructor, strong exception guarantee unless T::operator= throws
+	 */
 	FDeque(const FDeque<T> &o) : FDeque(o.currentCapacity) {
 		for(auto it = o.data; it != o.dataEnd; it++) {
 			*this->dataEnd++ = *it;
@@ -158,14 +181,6 @@ public:
 		return dataEnd - data;
 	}
 
-	friend std::ostream &operator<<(std::ostream &os, const FDeque<T> &self) {
-		os << "Matrix <" << typeid(T).name() << "> " << &self<< std::endl;
-		for (auto it : self) {
-			os << "[" << &it << "] :\n"  << it ;
-		}
-		return os;
-	}
-
 private:
 	static int list_number;
 
@@ -181,6 +196,22 @@ private:
 	int currentCapacity;
 };
 
+/**
+ * no need to use private part, so standalone version
+ */
+template<typename T>
+std::ostream &operator<<(std::ostream &os, const FDeque<T> &self) {
+	os << "Matrix <" << typeid(T).name() << "> " << &self<< std::endl;
+	for (auto it : self) {
+		os << "[" << &it << "] :\n"  << it ;
+	}
+		return os;
+	}
+
+
+/**
+ * list counter
+ */
 template<typename T>
 int FDeque<T>::list_number = 0;
 
